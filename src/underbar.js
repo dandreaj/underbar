@@ -177,16 +177,32 @@
   //   }); // should be 5, regardless of the iterator function passed in
   //          No accumulator is given so the first element is used.
   _.reduce = function(collection, iterator, accumulator) {
-    if(accumulator === undefined){
-      accumulator = collection[0];
-      for(var i = 1;i<collection.length;i++){
-        accumulator = iterator(accumulator, collection[i]);
+    if(Array.isArray(collection)){
+      if(accumulator === undefined){
+        accumulator = collection[0];
+
+        for(var i = 1;i<collection.length;i++){
+          accumulator = iterator(accumulator, collection[i]);
+        }
+      } else {
+        for(var y = 0;y<collection.length;y++){
+          accumulator = iterator(accumulator, collection[y]);
+        }
       }
-    } else {
-      for(var y = 0;y<collection.length;y++){
-        accumulator = iterator(accumulator, collection[y]);
+    } else{
+      if(accumulator === undefined){
+        accumulator = collection[0];
+
+        for(var key in collection){
+          accumulator = iterator(accumulator, collection[key]);
+        }
+      } else {
+        for(var key2 in collection){
+          accumulator = iterator(accumulator, collection[key2]);
+        }
       }
     }
+
     return accumulator;
   };
 
@@ -205,13 +221,20 @@
 
   // Determine whether all of the elements match a truth test.
   _.every = function(collection, iterator) {
-    // TIP: Try re-using reduce() here.
+      iterator = iterator || _.identity;
+      return _.reduce(collection, function(wasFound, item){
+          return !!iterator(item) && wasFound;
+      }, true);
   };
 
   // Determine whether any of the elements pass a truth test. If no iterator is
   // provided, provide a default one
   _.some = function(collection, iterator) {
     // TIP: There's a very clever way to re-use every() here.
+    iterator = iterator || _.identity;
+    return _.reduce(collection, function(wasFound, item){
+      return !!iterator(item) || wasFound;
+    }, false);
   };
 
 
